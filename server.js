@@ -16,27 +16,28 @@ function initPrompt () {
     
     inquirer
         .prompt({
-        type: "list",
-        name: "prompt",
-        message: "Would you like to do?",
-        choices: [
-            "View All Employees",
-            "Add Employee",
-            "Update Employee Role",
-            "View All Roles",
-            "Add Role",
-            "View All Departments",
-            "Add Department",
-            "Quit"
+            type: "list",
+            name: "prompt",
+            message: "Would you like to do?",
+            choices: [
+                "View All Employees",
+                "Add Employee",
+                "Update Employee Role",
+                "View All Roles",
+                "Add Role",
+                "View All Departments",
+                "Add Department",
+                "Quit"
         ]})
         .then((answer) => {
+            console.log(answer.prompt);
             switch (answer.prompt) {
                 case "View All Employees":
                     viewAllEmployees();
                     break;
                 
                 case "Add Employee":
-                    AddEmployee();
+                    addEmployee();
                     break;
             
                 case "Update Employee Role":
@@ -110,6 +111,38 @@ function viewAllDepartments() {
         console.table(res);
         initPrompt();
     })
+};
+
+function addEmployee () {
+    const roles = connection.query(`SELECT r.title FROM roles r`, (err,res) => {
+        if (err) {
+            throw err;
+        }
+        return res;
+    });
+
+    console.table(roles);
+    inquirer
+        .prompt([
+            {
+              type: "input",
+              name: "first_name",
+              message: "What is this employee's first name?"
+            },
+            {
+              type: "input",
+              name: "last_name",
+              message: "What is this employee's last name?"
+            },
+            {
+              type: "list",
+              name: "roleName",
+              message: "What is the role of this employee?",
+              choices: roles
+            },
+
+        ])
+        .then()
 };
 
 console.log(
