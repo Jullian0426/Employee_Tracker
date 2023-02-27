@@ -68,15 +68,42 @@ function initPrompt () {
 
 function viewAllEmployees() {
     const sql = `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
-    FROM employees e
-    JOIN roles r
-      ON e.role_id = r.id
-    JOIN departments d
-    ON d.id = r.department_id
-    LEFT JOIN employees m
-      ON m.id = e.manager_id`;
+                 FROM employees e
+                 JOIN roles r
+                    ON e.role_id = r.id
+                 JOIN departments d
+                    ON d.id = r.department_id
+                 LEFT JOIN employees m
+                    ON m.id = e.manager_id`;
 
     connection.query(sql, (err, res) => {
+        if (err) {
+            throw err;
+        }
+        console.table(res);
+        initPrompt();
+    })
+};
+
+function viewAllRoles() {
+    const sql = `SELECT r.id, r.title, r.salary, d.name AS department
+                 FROM roles r
+                 JOIN departments d
+                    ON r.department_id = d.id`;
+
+    connection.query(sql, (err,res) => {
+        if (err) {
+            throw err;
+        }
+        console.table(res);
+        initPrompt();
+    })
+};
+
+function viewAllDepartments() {
+    const sql = `SELECT * FROM departments`;
+
+    connection.query(sql, (err,res) => {
         if (err) {
             throw err;
         }
