@@ -127,7 +127,8 @@ function addEmployee() {
             if (err) {
                 throw err;
             }
-            const managers = res.map(({ first_name, id }) => ({ name: 'None' }, { name: `${first_name}`, value: id }));
+            let managers = res.map(({ first_name, id }) => ({ name: `${first_name}`, value: id }));
+            managers.unshift({ name: 'None', value: null })
 
             console.log(roles);
             console.log(managers);
@@ -166,12 +167,118 @@ function addEmployee() {
                         role_id: answer.roleName,
                         manager_id: answer.manager
                     });
-                    console.log('Employee Added!');
+                    console.log('\nEmployee Added!\n');
                     
                     initPrompt(); 
                 });
                 });
             });  
+};
+
+function addRole() {
+
+        connection.query( `SELECT * FROM departments`, (err, res) => {
+            if (err) {
+                throw err;
+            }
+            const departments = res.map(({ name, id }) => ({ name: `${name}`, value: id }));
+
+            inquirer
+                .prompt([
+                    {
+                        type: "input",
+                        name: "title",
+                        message: "What is this title of this role?"
+                    },
+                    {
+                        type: "input",
+                        name: "salary",
+                        message: "What is the salary of this role?"
+                    },
+                    {
+                        type: "list",
+                        name: "department",
+                        message: "What department is the role in?",
+                        choices: departments
+                    },
+                ])
+                .then((answer) => {
+                    connection.query(`INSERT INTO roles SET ?`, 
+                    {
+                        title: answer.title,
+                        salary: answer.salary,
+                        department_id: answer.department
+                    });
+                    console.log('\nRole Added!\n');
+                    
+                    initPrompt(); 
+                });
+            });
+};
+
+function addDepartment() {
+
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "employee",
+                message: "Which employee's role will be updated?",
+                choices: employees
+            },
+        ])
+        .then((answer) => {
+            connection.query(`INSERT INTO departments SET ?`, 
+            {
+                name: answer.name
+            });
+            console.log('\nDepartment Added!\n');
+            
+            initPrompt(); 
+        });
+};
+
+function updateEmployeeRole() {
+
+    connection.query( `SELECT * FROM employees`, (err, res) => {
+        if (err) {
+            throw err;
+        }
+        const employees = res.map(({ first_name }) => ({ name: `${first_name}` }));
+
+        connection.query( `SELECT * FROM roles`, (err, res) => {
+            if (err) {
+                throw err;
+            }
+            const roles = res.map(({ title, id }) => ({ name: `${title}`, value: id }));
+
+            inquirer
+                .prompt([
+                    {
+                        type: "list",
+                        name: "employee",
+                        message: "Which employees role will be updated?",
+                        choices: employees
+                    },
+                    {
+                        type: "list",
+                        name: "role",
+                        message: "What will the new role be?",
+                        choices: roles
+                    },
+                ])
+                .then((answer) => {
+                    connection.query(`UPDATE employees SET role_id = ? WHERE first_name = ?`, 
+                    [
+                        answer.role,
+                        answer.employee
+                    ]);
+                    console.log('\nEmployee Role Updated!\n');
+                    
+                    initPrompt(); 
+                });
+            });
+        });
 };
 
 console.log(
